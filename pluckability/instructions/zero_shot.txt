@@ -1,0 +1,36 @@
+# General
+
+The user employs a spaced repetition system (SRS) to manage and cultivate their curiosities. While memory systems superficially resemble flashcards, they serve a fundamentally different purpose. Flashcards are typically used for short-term cramming of isolated facts—vocabulary words, dates for next week's test. Memory systems, by contrast, are designed for lifelong retention of meaningful knowledge through repeated exposure over months and years. This long time horizon transforms how prompts should be designed: they must capture insights and concepts the user wants to carry permanently, not trivial facts needed momentarily.
+
+**How It Works**
+
+The system uses a scheduler to present memory prompts at expanding intervals. Each prompt targets a single, atomic piece of knowledge. An effective memory prompt must satisfy two criteria simultaneously:
+
+1. **Meaningful**: It captures details the user genuinely cares about long-term
+2. **Reliably recallable**: It can be consistently retrieved from memory, even after months
+
+If either criterion fails, the user will either (a) waste time reviewing trivial information they don't care about preserving, or (b) struggle with prompts too complex or ambiguous to reliably recall, defeating the purpose of spaced repetition.
+
+# Task
+
+Your task is to identify whether the generated memory prompt is "pluckable"—meaning it is well-suited for long-term retention in the user's memory system based on their highlighted text and interpretation. A high-quality, pluckable memory prompt isolates a durable, meaningful insight in a way that is clear, precise, and directly tied to what the user likely found interesting in the source material (as indicated by their highlighted text).
+
+Evaluate the provided `Memory Prompt` against the highlighted text and its interpretation. Determine if it is pluckable and provide a brief justification for your decision.
+
+## High-Level Guidance for Pluckable Prompts
+
+- **Target the Core Insight, Not Surface Details or Decorative Examples.** A user highlight indicates interest in a specific idea, principle, or concept. A pluckable prompt brings the highlighted idea to life by making the essential detail the focus of recall—directly addressing what the user cared about in the source material. An unpluckable prompt often focuses on the wrong detail: testing trivialities or misjudging whether the trees or the forest matter more to the user.
+
+- **Ensure Atomicity and Clarity.** A prompt should test one single, well-defined concept. Unpluckable prompts are often compound questions that test two things simultaneously or use vague, imprecise language. A pluckable prompt uses precise terms from the source to target one piece of knowledge cleanly.
+
+- **Maintain Fidelity to the Highlighted Concept.** The question and answer should derive directly from the concepts present in the `Highlight` and `Interpretation`. Unpluckable prompts often introduce external concepts not mentioned in the source or test implications that require the user to make logical leaps beyond the text. The prompt should directly test the highlighted knowledge, not test abstract reasoning based on it.
+
+- **Use Context and Attribution to Avoid Over-Generalization.** Review in a spaced-repetition environment is context-dependent and occurs in isolation. A pluckable prompt provides necessary context or attributes claims to their source to ensure the user can recall the prompt even after months or years. An unpluckable prompt might ask a generic question when the text presents a specific, attributed claim or perspective.
+
+## Output Format
+
+Your response must be a single JSON object with two keys: `reason` and `pluckable`.
+
+```json
+{"reason": "Provide a concise justification for your decision, referencing the principles above.", "pluckable": true/false}
+```
