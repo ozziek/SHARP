@@ -133,7 +133,7 @@ def create_detailed_breakdown(data: Dict[str, pd.DataFrame], console: Console) -
 
     table.add_column("Run", style="cyan", no_wrap=True)
     table.add_column("Split", style="orange3", no_wrap=True)
-    table.add_column("Total", justify="right", style="blue", no_wrap=True)
+    table.add_column("n", justify="right", style="green", no_wrap=True)
     table.add_column("accuracy", justify="right", style="yellow", no_wrap=True)
     table.add_column("precision", justify="right", style="yellow", no_wrap=True)
     table.add_column("recall", justify="right", style="yellow", no_wrap=True)

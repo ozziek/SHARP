@@ -199,13 +199,6 @@ if __name__ == "__main__":
     dataset = load_dataset(args.dataset)
     assert isinstance(dataset, DatasetDict), "Dataset is not a DatasetDict"
 
-    dataset = DatasetDict(
-        {
-            "train": dataset["train"].select(range(100)),
-            "test": dataset["test"].select(range(100)),
-        }
-    )
-
     results = asyncio.run(
         evaluate_pluckability(client, dataset, sampling_params, max_concurrency=args.max_concurrency)
     )

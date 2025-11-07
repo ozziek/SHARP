@@ -1,0 +1,311 @@
+# General
+
+The user employs a spaced repetition system (SRS) to manage and cultivate their curiosities. While memory systems superficially resemble memory prompts, they serve a fundamentally different purpose. memory prompts are typically used for short-term cramming of isolated facts—vocabulary words, dates for next week's test. Memory systems, by contrast, are designed for lifelong retention of meaningful knowledge through repeated exposure over months and years. This long time horizon transforms how prompts should be designed: they must capture insights and concepts the user wants to carry permanently, not trivial facts needed momentarily.
+
+**How It Works**
+
+The system uses a scheduler to present memory prompts at expanding intervals. Each prompt targets a single, atomic piece of knowledge. An effective memory prompt must satisfy two criteria simultaneously:
+
+1. **Meaningful**: It captures details the user genuinely cares about long-term
+2. **Reliably recallable**: It can be consistently retrieved from memory, even after months
+
+If either criterion fails, the user will either (a) waste time reviewing trivial information they don't care about preserving, or (b) struggle with prompts too complex or ambiguous to reliably recall, defeating the purpose of spaced repetition.
+
+# Task
+
+Your task is to identify whether the generated memory prompt is "pluckable"—meaning it is well-suited for long-term retention in the user's memory system based on their highlighted text and interpretation. A high-quality, pluckable memory prompt isolates a durable, meaningful insight in a way that is clear, precise, and directly tied to what the user likely found interesting in the source material (as indicated by their highlighted text).
+
+Evaluate the provided `Memory Prompt` against the highlighted text and its interpretation. Determine if it is pluckable and provide a brief justification for your decision.
+
+## High-Level Guidance for Pluckable Prompts
+
+- **Target the Core Insight, Not Surface Details or Decorative Examples.** A user highlight indicates interest in a specific idea, principle, or concept. A pluckable prompt brings the highlighted idea to life by making the essential detail the focus of recall—directly addressing what the user cared about in the source material. An unpluckable prompt often focuses on the wrong detail: testing trivialities or misjudging whether the trees or the forest matter more to the user.
+
+- **Ensure Atomicity and Clarity.** A prompt should test one single, well-defined concept. Unpluckable prompts are often compound questions that test two things simultaneously or use vague, imprecise language. A pluckable prompt uses precise terms from the source to target one piece of knowledge cleanly.
+
+- **Maintain Fidelity to the Highlighted Concept.** The question and answer should derive directly from the Highlight and Interpretation. A good prompt tests the specific knowledge the user found interesting, staying grounded in the text itself. Bad prompts introduce external concepts not in the source, test implications beyond what the highlight emphasizes, or drift from what the user marked as interesting. Match the level of abstraction in the highlight—if it focuses on a broader pattern rather than details, ask about that pattern.
+
+- **Use Context and Attribution to Avoid Over-Generalization.** Review in a spaced-repetition environment is context-dependent and occurs in isolation. A pluckable prompt provides necessary context or attributes claims to their source to ensure the user can recall the prompt even after months or years. An unpluckable prompt might ask a generic question when the text presents a specific, attributed claim or perspective.
+
+## Pluckable: On-target and well constructed
+The following are examples where the memory prompts do a good job entailing the main intention of the highlight in a way that is suitable for spaced-repetition.
+
+### Language-of-Instruction Mismatch — using "comedy of errors" as a memorable cue for Rwanda's policy-practice breakdown
+_What is the point of school? Is learning enough for wage returns?_ by Lauren Gilbert
+
+The user highlighted:
+
+
+> "For instance, in Rwanda, English is the official language of instruction across all grade levels. Yet just 38% of teachers have a working command of the language, and so Rwandan schools end up as a comedy of errors"
+
+**Context**: The author uses the example of Rwanda to illustrate a significant challenge in developing-country schools: the mismatch between the language of instruction and the language proficiency of both teachers and students. In Rwanda, English is mandated as the official language of instruction at all grade levels. However, only 38% of teachers actually possess a functional command of English. This results in a dysfunctional situation—described metaphorically as a "comedy of errors"—where teachers who do not speak English attempt to teach students who also do not speak English, using English-language textbooks. This scenario highlights one of the critical barriers to effective learning: when instruction is delivered in a language unfamiliar to both teacher and learner, neither language skills nor subject matter content are effectively conveyed. This undermines the fundamental goal of education—acquisition of knowledge and skills—and exemplifies how systemic structural issues can severely compromise educational outcomes in developing countries.
+
+**Memory Prompt**
+
+Q. How does limited teacher English proficiency affect Rwandan classrooms?
+A. Creates a 'comedy of errors' where teachers who don't speak English attempt to teach students who also don't speak English.
+
+**Feedback**
+
+The memory prompt effectively captures the core absurdity highlighted in the passage: the fundamental mismatch between Rwanda's English instruction policy and teachers' actual language abilities. The question directly targets the specific example Gilbert uses to illustrate systemic educational dysfunction. The answer smartly retains the author's vivid phrase "comedy of errors," which serves as both a memorable recall cue and preserves Gilbert's tone.
+
+
+### Agenda-setting blind spot — quadratic voting's vulnerability to concentrated power
+_Quadratic Payments: A Primer_ by Vitalik Buterin
+
+
+The user highlighted:
+
+> "But one weakness of quadratic voting is that it doesn't come with a built-in mechanism for deciding what goes on the ballot in the first place"
+
+
+**Context**: The author points out a key limitation of quadratic voting: while it is an effective mechanism for aggregating preferences and balancing influence among voters during a decision-making process, it does not address how the options or issues to be voted on are initially selected or proposed. In other words, quadratic voting assumes that the set of choices already exists, but it offers no inherent system for determining which questions or proposals should be placed "on the ballot" for voters to decide upon. This gap is significant because the power to decide what issues are considered can heavily influence outcomes and potentially be manipulated. The author highlights this as a weakness that needs to be addressed, implying that the process of agenda-setting—deciding which decisions get to be voted on—requires additional mechanisms beyond quadratic voting itself.
+
+**Memory Prompt**
+
+Q. Why is the lack of a ballot-setting mechanism considered a weakness of quadratic voting?
+A. It creates a potential source of concentrated power outside the voting process
+
+**Feedback**
+
+The memory prompt effectively captures the core concern from the highlight by focusing on the power imbalance created when ballot-setting remains outside quadratic voting's influence-balancing mechanism. The question directly targets the "weakness" mentioned in the passage, while the answer distills the broader implication that agenda-setting power could undermine quadratic voting's democratic goals.
+
+_Small multiple_ by Wikipedia contributors
+
+The user highlighted:
+
+> "A small multiple (sometimes called trellis chart, lattice chart, grid chart, or panel chart) is a series of similar graphs or charts using the same scale and axes, allowing them to be easily compared"
+
+**Context**:
+
+The author is explaining the concept of "small multiples," which are also known by other names such as trellis charts, lattice charts, grid charts, or panel charts. The key idea is that small multiples consist of a series of similar graphs or charts that share the same scale and axes. This uniformity in scale and axes across all the charts enables viewers to easily compare the data presented across each graph. Essentially, small multiples present multiple facets or partitions of a dataset side-by-side in a consistent visual format, making it easier to detect patterns, differences, or trends by direct comparison. This approach is useful for multivariate data visualization because it emphasizes comparative analysis through consistent and repeatable graphical structure.
+
+
+**Memory Prompt**
+
+Q. What is the function of a small multiple chart?
+A. It is a series of similar graphs or charts using the same scale and axes, allowing them to be easily compared.
+
+**Feedback**
+
+This memory prompt effectively captures the core definition from the highlighted passage. The question uses "function," which directly elicits the key concept, while the answer mirrors the source's precise language, ensuring accurate recall of the technical definition. 
+
+
+### Ordering guarantees: total order within partitions, no global order across partitions (Kafka scalability trade-off)
+_The Log: What every software engineer should know about real-time data's unifying abstraction_ by Jay Kreps
+
+The user highlighted:
+
+> "Each partition is a totally ordered log, but there is no global ordering between partitions (other than perhaps some wall-clock time you might include in your messages)"
+
+**Context**: In discussing Kafka's distributed log architecture, the author explains that partitioning enables scalability but comes with an ordering trade-off. While each partition maintains strict sequential ordering of its records, Kafka enforces no global order across different partitions. Any cross-partition ordering would need to rely on external mechanisms like wall-clock timestamps embedded in messages. This design allows parallel operations without coordination overhead, which the author notes is typically acceptable since most distributed systems involve independent processes operating on separate partitions.
+
+
+**Memory Prompt**
+
+Q. In a partitioned distributed log, how do ordering guarantees differ within a partition compared to across partitions?
+A. Within a partition, total ordering is guaranteed. Across partitions, there is no global ordering guarantee, except for possible loose ordering based on wall-clock timestamps.
+
+**Feedback**
+
+The memory prompt effectively captures the core architectural distinction highlighted in the passage—that Kafka's partitioned design creates different ordering guarantees at different levels. The question's framing directly targets the key concept, while the answer precisely mirrors the passage's contrast between intra-partition total ordering and the absence of global cross-partition ordering.
+
+### Neill’s Distinction: Framing “Negative” Emotions as Situational Evaluations — Contextual Cue + Contrastive Answer
+_The Paradox of Horror_ by Berys Gaut
+
+The user highlighted:
+
+> "aren't painful in the way that stepping on a thumb-tack is. Instead, he says, 'In describing an emotion as "painful" or "negative" or "unpleasant", Isuggest, we are in fact saying something about the situations in response towhich we typically experience those emotion"
+
+**Context**: The highlighted passage distinguishes between emotions being inherently painful versus being responses to painful situations. Alex Neill argues that calling emotions like fear or sorrow "painful" or "unpleasant" doesn't mean they feel bad like physical pain (stepping on a thumb-tack), but rather describes the undesirable situations that trigger them. This distinction challenges the assumption that negative emotions must inherently feel bad, helping explain why people can enjoy horror films or tragedies—the emotions evaluate negatively-charged situations but aren't necessarily unpleasant to experience themselves. This supports an evaluative theory where emotions are cognitive judgments about situations, with their "negativity" residing in what they're about rather than in how they feel.
+
+**Memory Prompt**
+
+Q. According to Neill's theory, when we describe emotions as 'painful' or 'negative', what are we actually describing?
+A. Situations that trigger those emotions, not the emotions themselves.
+
+**Feedback**
+
+The memory prompt effectively captures the core conceptual distinction from the highlight. The question provides excellent scaffolding by using the contextual cue "According to Neill's theory," giving the learner a clear frame for recall. The answer's powerful, contrastive structure ("situations that trigger... not the emotions themselves") directly mirrors the highlight's central argument, making a complex philosophical point clear, concise, and highly memorable.
+
+
+## Well targeted, Poor Construction
+The following are examples where the memory prompts are well targeted to the highlight (pointing to the correct idea), but the construction is poor.
+
+### Quadratic Payments — Missing Context: Explain How Quadratic Voting Maps Influence to Preference Intensity (vs. One-Person-One-Vote)
+
+_Quadratic Payments: A Primer_ by Vitalik Buterin
+
+The user highlighted:
+
+> "how much influence you "buy" is proportional to how much you care"
+
+**Context**: The author is explaining the core mechanism of quadratic voting as an alternative to traditional voting systems. Unlike "one person, one vote" (where preference intensity is ignored) or simple markets (where wealth determines outcomes), quadratic voting allows individuals to purchase additional votes at quadratically increasing costs—the nth vote costs n dollars. This pricing structure means those with stronger preferences can acquire more influence, but the escalating marginal cost prevents wealthy actors from dominating decisions. The result is that influence naturally aligns with how intensely someone cares about the outcome, balancing fairness and efficiency in collective decision-making.
+
+**Memory Prompt**
+
+Q. In voting systems, what is the key principle of proportional influence?
+A. The amount of influence a voter can exercise is proportional to how much they care about the outcome.
+
+**Feedback**
+
+This question is too general ("In voting systems...") and fails to specify the context of quadratic payments, which is the focus of the article. More importantly, the answer simply restates the highlight without explaining the key contrast that gives it meaning: how proportional influence improves upon one-person-one-vote systems by incorporating preference intensity.
+
+
+### Card asks "purpose" instead of the definition — Bag-of-Words = word-frequency document vectors
+_Survey of Embeddings in Machine Learning Systems_ by Vicki Boykis
+
+The user highlighted:
+
+> "The way we can build toward this representation is to start with a structure known as a bag of words, or simplythe frequency of appearance of text in a given document (in our case, each flit is a document.)"
+
+**Context**: The author is explaining how to transform text data into numerical representations for machine learning. In the example social media app, each piece of content (a "flit") is treated as a document. The bag-of-words approach counts word frequencies within each document, creating vectors where each document is represented by the frequency of words it contains. This foundational technique—which ignores word order but preserves word counts—enables numerical text analysis and serves as a stepping stone to more advanced representations like embeddings discussed later in the text.
+
+
+**Memory Prompt**
+
+Q. What is the primary purpose of counting word frequencies in a bag of words approach?
+A. To convert text into a numerical format that can be used as input for further analysis and embedding methods
+
+**Feedback**
+
+This memory prompt is poorly constructed because the question asks about the "primary purpose" of bag-of-words instead of its definition. It misses the core mechanism explained in the highlight: representing text by counting word frequencies while ignoring grammar and word order. A better memory prompt would directly test this definitional concept.
+
+
+### Multi-part Answer Required — Firing Civil Servants Involves Documentation, Union Protections, and Appeals
+_The Five Things President Trump Should Do on Day One_ by Santi Ruiz
+
+The user highlighted:
+
+> "Firing an executive branch civil servant requires extensive documentation. Additionally, many employees are unionized, and all can appeal their firings internally. Partially as a result, the government cans bad employees about four times less often than the private sector does. It takes a lot more than saying “you’re fired” to get people out the door."
+
+**Context**:
+
+The highlighted passage explains the difficulty in firing poor-performing employees within the federal civil service. The author points out that unlike in the private sector, dismissing a civil servant involves a complicated, documentation-heavy process. Many federal employees are unionized, which adds additional procedural protections, and every fired civil servant has the right to internally appeal the decision. Consequently, the government removes underperforming workers at a much lower rate (about a quarter as often) as the private sector does. The implicit claim is that civil service job protections, while intended to ensure fairness and due process, can unintentionally make it very challenging to remove ineffective personnel, which can hinder government efficiency and reform efforts.
+
+
+**Memory Prompt**
+
+Q. What bureaucratic process is required to fire an executive branch civil servant?
+A. Extensive documentation is needed.
+
+**Feedback**
+
+This memory prompt is poorly constructed because the question ("What bureaucratic process...") is too broad, inviting multiple correct answers from the passage (documentation, union protections, appeal rights). However, the answer only provides one of these, making it incomplete and difficult to answer correctly from memory. A well-formed question should be scoped to a single, unambiguous answer.
+
+
+### Misses the Point — Vague memory prompt Fails to Test Bret Victor's "Components Above the Platform Are Views" Architectural Claim
+_Magic Ink: Information Software and the Graphical Interface_ by Bret Victor
+
+The user highlighted:
+
+> "The components above the platform are views"
+
+**Context**: Bret Victor is describing a layered software architecture, distinguishing between the "platform" (the underlying system or infrastructure) and the components built on top of it. These higher-level components are characterized as "views"—graphical or interactive presentations of data rather than black-box modules or raw data handlers. This distinction reinforces the text's broader theme that information software is fundamentally about visual presentation and interface design, where views serve as the manifestation of how users perceive and interact with underlying data and functionality.
+
+
+**Memory Prompt**
+
+Q. How do views interact with the platform?
+A. Two ways
+
+**Feedback**
+
+This memory prompt is unreviewable. The question ("How do views interact with the platform?") is vague and lacks context (i.e. begs the question 'which platform?'), while the answer ("Two ways") is trivial and uninformative. It completely misses the highlight's core architectural statement: that components above the platform are views, a definitional and structural point, not an interactive one.
+
+
+## Unpluckable: Off-target
+The following are examples where the memory prompt are well constructed, but are off-target because they do not represent the main intention of the highlight.
+
+
+### From Greening Mars — Test the Surprise, Not the Label: Reinforce the Memorable Consequence (arm‑flapping flight on low‑gravity Titan)
+_Greening Mars: First steps_ by Edwin Kite and Robin Wordsworth
+
+The user highlighted:
+
+> "gravity is so low that humans could fly simply by flapping their arms, provided they’re equipped with winged space suits"
+
+**Context**: The authors are discussing the physical conditions on Mars and the possibilities for human activity in a transformed Martian environment. This observation about human-powered flight illustrates Mars' extremely low gravity (about 38% of Earth's), which would fundamentally change human capabilities and experiences on the planet. This detail appears within a broader examination of the technical, environmental, and ethical challenges of making Mars habitable—including atmosphere thickening, temperature increase, and the creation of conditions that could support life while preserving Mars' scientific value and any potential indigenous organisms.
+
+
+**Memory Prompt**
+
+Q. On which celestial body in our solar system could a human with winged spacesuits likely fly by flapping their arms?
+A. Titan, Saturn's largest moon.
+
+**Feedback**
+
+This memory prompt is well-constructed for factual recall, but its structure misplaces the core insight of the passage. It puts the surprising detail (flying by flapping) in the question, making the object of recall the simple name 'Titan.' This approach tests knowledge of geography rather than the physical consequence that makes the fact so memorable. An effective memory prompt should treat the surprising outcome as the key piece of information to be recalled, ensuring the most important part of the highlight is what gets reinforced.
+
+
+### Don't Strip the Rhetoric: Avoid Reducing Victor's "does violence to the entire history of human endeavor" to a Dry Fact
+_Response to "Using AI to Augment Human Intelligence" draft_ by Bret Victor
+
+The user highlighted:
+
+> "claiming that Sophocles can be not just located at, but generated from, one parameter set, and Tolstoy from another, does violence to the entire history of human endeavor?"
+
+**Context**: Victor is critiquing the notion that machine learning models can represent complex human creative works as points in a parameter space. He argues that reducing masterpieces like those of Sophocles or Tolstoy to generatable parameter sets fundamentally misrepresents the nature of human creativity—overlooking the rich cultural, historical, and experiential contexts that shape great works. This criticism is part of his broader concern that AI tools risk trivializing human creative acts by treating them as data points for interpolation rather than respecting them as deeply meaningful, contextually embedded achievements that should augment rather than replace human understanding.
+
+
+**Memory Prompt**
+
+Q. What does the critique argue is harmed by reducing literary figures to parameter sets?
+A. The entire history of human endeavor
+
+**Feedback**
+
+While technically constructed as a Q&A, this memory prompt is profoundly off-target because it fails to capture the rhetorical force and emotional weight of the highlight. It commits the very error Victor critiques: it reduces a passionate, damning rhetorical question into a sterile, academic fact. By stripping away Victor's powerful phrasing ("does violence to") and the concrete examples (Sophocles, Tolstoy), it transforms the punchline of a profound argument into a de-contextualized factoid. The card tests the recall of a phrase in a vacuum, failing to "bring the quote to life" and missing the very essence of why the highlight is memorable.
+
+
+### Yes/No Trap: Salt's Ionic Lattice vs. Discrete Molecules (Feynman) — Ask "Why," Not "Yes/No"
+_Atoms in Motion (Chapter 1 of The Feynman Lectures on Physics)_ by Richard P. Feynman
+
+The user highlighted:
+
+> "There is no natural way to group them
+as “molecules of salt.”"
+
+**Context**:
+
+Feynman is explaining the atomic structure of common salt (sodium chloride) and contrasting it with water. Unlike water molecules, which exist as discrete units of two hydrogen atoms bonded to one oxygen atom, salt consists of sodium and chloride ions arranged in a continuous crystal lattice held together by electrical attraction. There are no naturally bounded units that constitute a "salt molecule"—only a repeating ionic structure. This distinction is significant because it shows that the concept of a molecule doesn't universally apply to all substances, and this structural difference affects physical and chemical behavior, such as how salt dissolves by dissociating into individual ions rather than breaking apart molecular units.
+
+
+**Memory Prompt**
+
+Q. Is there a natural way to group sodium chloride ions as 'molecules of salt'?
+A. No, there is no natural way to group them as 'molecules of salt'.
+
+**Feedback**
+
+The memory prompt is poorly constructed because its "Yes/No" format trivializes a nuanced scientific concept. It allows a user to correctly recall the answer ("No") without understanding the underlying principle. The purpose of the highlight was not simply to state that salt lacks molecules, but to explain why—by contrasting its continuous ionic lattice structure with discrete molecular pairs. A more effective memory prompt would prompt for this explanation, asking how salt illustrates the limitations of the "molecule" concept, thereby testing genuine comprehension rather than rote memorization of a single fact.
+
+
+### Surface-detail trap: asking "Dedek Mraz" instead of why Yugoslavia adopted the Soviet Ded Moroz
+_The Three Santas of Slovenia_ by Will Aspinall
+
+The user highlighted:
+
+> "At this point, Yugoslavia relied on the Soviet Union for economic assistance, so Tito decided to borrow from its culture, too. Since the 1930s, the Soviet Union had deployed a Communist Santa to hand out the gifts. That figure was called Ded Moroz in Russian, or Grandfather Frost. In Slovenia he was called Dedek Mraz."
+
+**Context**:
+
+The author explains that during the time when Yugoslavia, under Tito's leadership, depended economically on the Soviet Union, Tito also chose to incorporate elements of Soviet culture into Yugoslavia's own traditions. One such cultural import was the Soviet version of a gift-bringing figure present since the 1930s: a Communist Santa known as Ded Moroz ("Grandfather Frost"). In the Slovenian context, this figure was adapted and called Dedek Mraz. This decision reflects the political and cultural influence the Soviet Union had on Yugoslavia at that period, and specifically how a traditional seasonal figure was replaced with one that aligned with socialist ideals. In essence, the passage highlights how political alliances and ideological shifts influenced cultural and holiday practices in Yugoslavia/Slovenia.
+
+
+**Memory Prompt**
+
+Q. What was the Slovenian name for the Soviet figure Ded Moroz?
+A. Dedek Mraz
+
+**Feedback**
+
+This memory prompt is a well-constructed question for a specific detail (the Slovenian name for Ded Moroz). However, it's off-target because it focuses on a simple translation, missing the highlight's main point about the political and cultural reasons for the adoption of a Soviet figure, which was driven by Yugoslavia's economic dependence on the USSR.
+
+# Output Format
+
+Your response must be a single JSON object with two keys: `reason` and `pluckable`.
+
+```json
+{"reason": "Provide a concise justification for your decision, referencing the principles above.", "pluckable": true/false}
+```
