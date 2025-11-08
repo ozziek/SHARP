@@ -2,7 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
-from _helpers import load_jsonl_data
+from src._helpers import load_jsonl_data
 
 
 def _create_heatmap(df: pd.DataFrame, split: str, output_dir: str, rows_per_chunk: int = 400):

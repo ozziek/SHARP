@@ -18,7 +18,7 @@ from rich.console import Console
 from rich.table import Table
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 
-from _helpers import load_jsonl_data
+from src._helpers import load_jsonl_data
 
 # Suppress sklearn warnings for cleaner output
 warnings.filterwarnings("ignore", category=UserWarning, module="sklearn")

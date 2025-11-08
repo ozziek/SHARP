@@ -9,7 +9,7 @@ from openai import AsyncOpenAI, Omit
 from datasets import DatasetDict, load_dataset
 from dotenv import load_dotenv
 from tqdm import tqdm
-from ._types import SHARPCard
+from src._types import SHARPCard
 
 
 @dataclass
