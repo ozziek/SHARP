@@ -11,5 +11,9 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "rich>=14.2.0",
     "scikit-learn>=1.7.2",
+    "seaborn>=0.13.2",
     "tqdm>=4.67.1",
 ]
+
+[tool.setuptools]
+packages = ["pluckability"]
