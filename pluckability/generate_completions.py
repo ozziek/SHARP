@@ -9,6 +9,7 @@ from openai import AsyncOpenAI, Omit
 from datasets import DatasetDict, load_dataset
 from dotenv import load_dotenv
 from tqdm import tqdm
+from src._format import format_user_message
 from src._types import SHARPCard
 
 
@@ -17,48 +18,6 @@ class _SamplingParams:
     model: str
     temperature: float | Omit
     system_instruction: str
-
-
-user_prompt_template = """I need your help with the following document: 
-    
-    ## [{title}]({url}) by {author}
-
-    **Highlight:**
-    
-    I highlighted the following text:
-    > {highlight}
-
-
-    **Interpretation of the highlight within the context of the document:**
-    {highlight_interpretation}
-
-    ## Memory Prompt
-
-    {content}
-    """
-
-
-def _format_user_message(row: SHARPCard) -> str:
-    source_meta = row["source_meta"]
-    assert isinstance(source_meta, dict), "Source meta is not a dictionary"
-
-    assert "author" in source_meta, "Author is not in source meta"
-    assert "title" in source_meta, "Title is not in source meta"
-
-    url = row["source_url"]
-    assert isinstance(url, str), "URL is not a string"
-
-    # replace newlines with another markdown quote marker
-    formatted_highlight = row["highlight"].replace("\n", "\n> ")
-
-    return user_prompt_template.format(
-        title=source_meta["title"],
-        url=url,
-        author=source_meta["author"],
-        highlight=formatted_highlight,
-        highlight_interpretation=row["highlight_interpretation"],
-        content=row["content"],
-    )
 
 
 async def _call_openai_judge(
@@ -70,7 +29,7 @@ async def _call_openai_judge(
             model=params.model,
             messages=[
                 {"role": "system", "content": params.system_instruction},
-                {"role": "user", "content": _format_user_message(row)},
+                {"role": "user", "content": format_user_message(row)},
             ],
             temperature=params.temperature,
             response_format={"type": "json_object"},

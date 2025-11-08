@@ -12,7 +12,7 @@ mkdir -p pluckability/data
 
 # # # Run 1: Zero-shot GPT-5 (no temperature specified)
 # echo "📊 Running zero-shot GPT-5 evaluation (default temperature)..."
-# uv run python -m pluckability.generate_completions \
+# uv run pluckability/generate_completions.py \
 #     --model "gpt-5" \
 #     --instruction-file "pluckability/instructions/zero_shot.txt" \
 #     --max-concurrency 18
@@ -21,7 +21,7 @@ mkdir -p pluckability/data
 
 # Run 2: Zero-shot GPT-4.1 (no temperature specified)
 # echo "📊 Running zero-shot GPT-4.1 evaluation (default temperature)..."
-# uv run python -m pluckability.generate_completions \
+# uv run pluckability/generate_completions.py \
 #     --model "gpt-4.1" \
 #     --instruction-file "pluckability/instructions/zero_shot.txt" \
 #     --max-concurrency 18
@@ -30,7 +30,7 @@ mkdir -p pluckability/data
 
 # Run 3: Multi-shot GPT-5 (no temperature specified)
 echo "📊 Running multi-shot GPT-5 evaluation (default temperature)..."
-uv run python -m pluckability.generate_completions \
+uv run pluckability/generate_completions.py \
     --model "gpt-5" \
     --instruction-file "pluckability/instructions/multi_shot.txt" \
     --max-concurrency 18
@@ -39,7 +39,7 @@ echo "✅ Multi-shot GPT-5 evaluation complete!"
 
 # Run 4: Multi-shot GPT-4.1 (no temperature specified)
 # echo "📊 Running multi-shot GPT-4.1 evaluation (default temperature)..."
-# uv run python -m pluckability.generate_completions \
+# uv run pluckability/generate_completions.py \
 #     --model "gpt-4.1" \
 #     --instruction-file "pluckability/instructions/multi_shot.txt" \
 #     --max-concurrency 18
