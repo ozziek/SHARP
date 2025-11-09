@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -e  # Exit on any error
 
 # Get the script's directory and project root
