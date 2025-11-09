@@ -128,6 +128,8 @@ if __name__ == "__main__":
     parser.add_argument("--temperature", type=float, default=None)
     parser.add_argument("--instruction-file", type=str, required=True)
     parser.add_argument("--max-concurrency", type=int, default=10)
+    parser.add_argument("--base-url", type=str, default=None, help="Custom base URL for OpenAI API")
+    parser.add_argument("--auth-token", type=str, default=None, help="Custom authentication token")
     args = parser.parse_args()
 
     instruction_name = args.instruction_file.split("/")[-1].split(".")[0]
@@ -150,9 +152,18 @@ if __name__ == "__main__":
     logging.info(f"Samplig with model: {args.model} and temperature: {temperature}")
 
     load_dotenv()
-    assert os.getenv("OPENAI_API_KEY") is not None, "OPENAI_API_KEY is not set"
 
-    client = AsyncOpenAI()
+    # Build client kwargs based on provided arguments
+    client_kwargs = {}
+    if args.base_url is not None:
+        client_kwargs["base_url"] = args.base_url
+    if args.auth_token is not None:
+        client_kwargs["api_key"] = args.auth_token
+    else:
+        # Only assert API key is set if no auth token provided
+        assert os.getenv("OPENAI_API_KEY") is not None, "OPENAI_API_KEY is not set"
+
+    client = AsyncOpenAI(**client_kwargs)
 
     logging.info(f"Loading dataset from {args.dataset}")
     dataset = load_dataset(args.dataset)
