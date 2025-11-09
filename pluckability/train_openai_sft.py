@@ -41,39 +41,26 @@ def _balance_dataset(dataset: Dataset, seed: int, max_rows: int | None = None):
     dataset_pluckable = dataset.filter(lambda x: x["pluckable"])
     dataset_unpluckable = dataset.filter(lambda x: not x["pluckable"])
 
-    unique_uris = dataset.unique("source_url")
-    assert isinstance(unique_uris, list), "Unique URIs is not a list"
-    assert len(unique_uris) > 0, "No unique URIs found"
-
     # choose an equal number of each type of challenging example
     base_length = min(len(dataset_pluckable), len(dataset_unpluckable))
     if max_rows is not None:
         # choose the maximum number of rows for each type of challenging example
         max_length = min(base_length, max_rows)
 
-        # to prevent overfitting to a single source, select a random row from each unique URI
-        selected_ids: set[int] = set()
-
         def _select_random_row(subset: Dataset):
-            # choose a random unique URI
-            attempts = 0
-            while attempts < 100:
-                url = random.choice(unique_uris)
-                # choose a random row from the URI
-                row = subset.filter(lambda x: x["source_url"] == url).shuffle(seed=seed).select(range(1))
-                if len(row) == 0:
-                    attempts += 1
-                    continue
-                if row[0]["id"] in selected_ids:
-                    attempts += 1
-                    continue
-                selected_ids.add(row[0]["id"])
-                assert isinstance(row, Dataset), "Row is not a Dataset"
-                # drop the row from the subset
-                subset = subset.filter(lambda x: x["id"] != row[0]["id"])
-                assert isinstance(subset, Dataset), "Subset is not a Dataset"
-                return row[0], subset
-            assert False, "Failed to select a random row; too many attempts"
+            # choose a random unique URL to avoid overfitting to a single source
+            unique_urls = subset.unique("source_url")
+            assert len(unique_urls) > 0, "No unique URLs found"
+            url = random.choice(unique_urls)
+            row = subset.filter(lambda x: x["source_url"] == url).shuffle(seed=seed).select(range(1))
+            assert len(row) > 0, "No row found"
+
+            row = row[0]
+
+            # drop the row by id from the subset
+            subset = subset.filter(lambda x: x["id"] != row["id"])
+
+            return row, subset
 
         rows: list[dict] = []
         while len(rows) < max_length:
