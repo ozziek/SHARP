@@ -18,11 +18,13 @@ source "$PROJECT_ROOT/.venv/bin/activate"
 
 uv run pluckability/form_dataset_sft.py \
   --base_instruction "pluckability/instructions/sft_instruction.txt" \
+  --balance \
   --split "train" \
   -o "train_ms_sft.jsonl"
 
 uv run pluckability/form_dataset_sft.py \
   --base_instruction "pluckability/instructions/sft_instruction.txt" \
+  --balance \
   --split "test" \
   -o "test_ms_sft.jsonl"
 
@@ -65,3 +67,16 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 NPROC_PER_NODE=$nproc_per_node swift sft \
     --model_name SHARP-Qwen3-32B-Pluck \
     --report_to wandb \
     --deepspeed zero2
+
+pip install vllm
+
+CUDA_VISIBLE_DEVICES=0,1,2,3 swift infer \
+    --adapters "./output/v4-20251109-061722/checkpoint-61" \
+    --infer_backend vllm \
+    --val_dataset './eval_train_ms_sft.jsonl' 'eval_test_ms_sft.jsonl' \
+    --stream true \
+    --use_hf true \
+    --gpu_memory_utilization 0.9 \
+    --tensor_parallel_size 2 \
+    --temperature 0 \
+    --max_new_tokens 64
