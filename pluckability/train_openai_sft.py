@@ -53,17 +53,30 @@ def _balance_dataset(dataset: Dataset, seed: int, max_rows: int | None = None):
 
         # to prevent overfitting to a single source, select a random row from each unique URI
         selected_ids: set[int] = set()
+
+        def _select_random_row(subset: Dataset) -> dict:
+            # choose a random unique URI
+            attempts = 0
+            while attempts < 100:
+                url = random.choice(unique_uris)
+                # choose a random row from the URI
+                row = subset.filter(lambda x: x["source_url"] == url).shuffle(seed=seed).select(range(1))
+                if len(row) == 0:
+                    attempts += 1
+                    continue
+                if row[0]["id"] in selected_ids:
+                    attempts += 1
+                    continue
+                selected_ids.add(row[0]["id"])
+                assert isinstance(row, Dataset), "Row is not a Dataset"
+                return row[0]
+            assert False, "Failed to select a random row; too many attempts"
+
         rows: list[dict] = []
         while len(rows) < max_length:
-            # choose a random unique URI
-            url = random.choice(unique_uris)
-            # choose a random row from the URI
-            row = dataset.filter(lambda x: x["source_url"] == url).shuffle(seed=seed).select(range(1))
-            if row[0]["id"] in selected_ids:
-                continue
-            selected_ids.add(row[0]["id"])
-            assert isinstance(row, Dataset), "Row is not a Dataset"
-            rows.append(row[0])
+            # select one from each row
+            rows.append(_select_random_row(dataset_pluckable))
+            rows.append(_select_random_row(dataset_unpluckable))
 
         balanced_dataset = Dataset.from_list(rows)
 
@@ -102,10 +115,9 @@ def build_dataset(dataset: Dataset, base_instruction: str):
     return training_completions
 
 
-def build_training_dataset(
-    dataset: DatasetDict, base_instruction: str, max_rows: int | None = None, seed: int = 42
-):
-    random.seed(args.seed)
+def build_training_dataset(dataset: DatasetDict, base_instruction: str, seed: int, max_rows: int | None = None):
+    assert seed is not None and isinstance(seed, int), "Seed is not an integer"
+    random.seed(seed)
 
     logging.info("Dataset: %s", dataset)
     assert "train" in dataset, "Train dataset is not in the dataset"
@@ -162,7 +174,7 @@ if __name__ == "__main__":
     assert isinstance(dataset, DatasetDict), "Dataset is not a DatasetDict"
 
     training_completions = build_training_dataset(
-        dataset=dataset, base_instruction=base_instruction, max_rows=args.max_rows, seed=args.seed
+        dataset=dataset, base_instruction=base_instruction, seed=args.seed, max_rows=args.max_rows
     )
 
     if args.dry_run:
@@ -175,7 +187,9 @@ if __name__ == "__main__":
             for completion in training_completions:
                 f.write(json.dumps(completion) + "\n")
 
-        logging.info("Uploading training data to OpenAI", args.model)
+        logging.info(
+            "Uploading training data to OpenAI",
+        )
         openai_file = client.files.create(
             file=open(temp_file.name, "rb"),
             purpose="fine-tune",
