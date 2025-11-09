@@ -87,15 +87,20 @@ def _build_messages(row: SHARPCard, base_instruction: str) -> list[ChatCompletio
             ),
         },
     ]
+
     return messages
 
 
-def build_dataset(dataset: Dataset, base_instruction: str) -> list[dict[str, list[ChatCompletionMessageParam]]]:
+def build_dataset(
+    dataset: Dataset, base_instruction: str, exclude_completions: bool
+) -> list[dict[str, list[ChatCompletionMessageParam]]]:
     balanced = _balance_dataset(dataset, seed=42)
     rows = []
     for row in balanced:
         row = cast(SHARPCard, row)
         messages = _build_messages(row, base_instruction)
+        if exclude_completions:
+            messages.pop(-1)  # drop the completion
         rows.append(
             {
                 "messages": messages,
@@ -110,6 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("--base_instruction", type=str, required=True)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--split", type=str, default="train")
+    parser.add_argument("--exclude_completions", action="store_true", default=False)
     parser.add_argument("-o", type=str, required=True)
     args = parser.parse_args()
 
@@ -124,7 +130,7 @@ if __name__ == "__main__":
 
     assert args.o.endswith(".jsonl"), "Output file must end with .jsonl"
 
-    sft_dataset = build_dataset(sft_dataset[args.split], base_instruction)
+    sft_dataset = build_dataset(sft_dataset[args.split], base_instruction, args.exclude_completions)
     assert isinstance(sft_dataset, list), "SFT dataset is not a list"
     with open(args.o, "w") as f:
         for completion in sft_dataset:
