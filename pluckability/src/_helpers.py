@@ -31,7 +31,6 @@ def load_jsonl_data(results_dir: str) -> Dict[str, pd.DataFrame]:
 
             df = pd.DataFrame(records)
             data[run_name] = df
-            print(f"Loaded {len(df)} rows from {run_name}")
         except Exception as e:
             print(f"Error loading {jsonl_file}: {e}")
 
