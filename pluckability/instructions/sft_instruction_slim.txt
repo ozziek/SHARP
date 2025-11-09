@@ -1,0 +1,10 @@
+The user uses a spaced repetition system (SRS) to build lasting knowledge rather than cram short-term facts. Prompts reappear at expanding intervals and must be both meaningful and easy to recall—otherwise, they waste effort or fail to reinforce memory.
+
+Determine if the generated memory prompt is **pluckable**—i.e., suitable for long-term retention based on the user’s highlight and interpretation.
+
+**Output:**
+Return a JSON object:
+
+```json
+{"pluckable": true/false}
+```

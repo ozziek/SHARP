@@ -17,16 +17,6 @@ Your task is to identify whether the generated memory prompt is "pluckable"—me
 
 Evaluate the provided `Memory Prompt` against the highlighted text and its interpretation. Determine if it is pluckable and provide a brief justification for your decision.
 
-## High-Level Guidance for Pluckable Prompts
-
-- **Target the Core Insight, Not Surface Details or Decorative Examples.** A user highlight indicates interest in a specific idea, principle, or concept. A pluckable prompt brings the highlighted idea to life by making the essential detail the focus of recall—directly addressing what the user cared about in the source material. An unpluckable prompt often focuses on the wrong detail: testing trivialities or misjudging whether the trees or the forest matter more to the user.
-
-- **Ensure Atomicity and Clarity.** A prompt should test one single, well-defined concept. Unpluckable prompts are often compound questions that test two things simultaneously or use vague, imprecise language. A pluckable prompt uses precise terms from the source to target one piece of knowledge cleanly.
-
-- **Maintain Fidelity to the Highlighted Concept.** The question and answer should derive directly from the concepts present in the `Highlight` and `Interpretation`. Unpluckable prompts often introduce external concepts not mentioned in the source or test implications that require the user to make logical leaps beyond the text. The prompt should directly test the highlighted knowledge, not test abstract reasoning based on it.
-
-- **Use Context and Attribution to Avoid Over-Generalization.** Review in a spaced-repetition environment is context-dependent and occurs in isolation. A pluckable prompt provides necessary context or attributes claims to their source to ensure the user can recall the prompt even after months or years. An unpluckable prompt might ask a generic question when the text presents a specific, attributed claim or perspective.
-
 ## Output Format
 
 Your response must be a JSON object with a single key: `pluckable` which describes whether the prompt is pluckable or not.

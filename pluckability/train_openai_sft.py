@@ -197,17 +197,17 @@ def main(args):
     test_file = _upload_openai_file(client, test_completions)
 
     # use a batch size of 1 for the online fine-tuning job (this is the default when you create a job, however I decreased the n_epochs to avoid overfitting)
-    online_fine_tuning_job = client.fine_tuning.jobs.create(
-        model=args.model,
-        hyperparameters={
-            "batch_size": 1,
-            "n_epochs": 1,
-        },
-        training_file=train_file.id,
-        validation_file=test_file.id,
-        suffix="sharp-pluckability-online",
-    )
-    logging.info("Created online fine-tuning job: %s", online_fine_tuning_job.model_dump_json())
+    # online_fine_tuning_job = client.fine_tuning.jobs.create(
+    #     model=args.model,
+    #     hyperparameters={
+    #         "batch_size": 1,
+    #         "n_epochs": 1,
+    #     },
+    #     training_file=train_file.id,
+    #     validation_file=test_file.id,
+    #     suffix="sharp-pluckability-online",
+    # )
+    # logging.info("Created online fine-tuning job: %s", online_fine_tuning_job.model_dump_json())
 
     # use a batch size of 4 for the offline fine-tuning job
     fine_tuning_job = client.fine_tuning.jobs.create(
