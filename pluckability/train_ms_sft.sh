@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -e  # Exit on any error
 
 # Get the script's directory and project root
@@ -29,11 +31,17 @@ echo "✅ Dataset created!"
 # use `--loss_scale ignore_empty_think`
 # Avoid losing the think capability by ignoring the loss of empty `<think>\n\n</think>\n\n`
 # This method is also applicable to the Deepseek-R1 series of models.
-swift sft \
+
+pip install deepspeed
+pip install wandb
+
+nproc_per_node=4
+
+CUDA_VISIBLE_DEVICES=0,1,2,3 NPROC_PER_NODE=$nproc_per_node swift sft \
     --model "Qwen/Qwen3-32B" \
+    --use_hf true \
     --train_type lora \
     --dataset './train_ms_sft.jsonl' \
-    --eval_dataset './test_ms_sft.jsonl' \
     --torch_dtype bfloat16 \
     --num_train_epochs 1 \
     --per_device_train_batch_size 1 \
@@ -42,7 +50,7 @@ swift sft \
     --lora_rank 32 \
     --lora_alpha 32 \
     --target_modules all-linear \
-    --gradient_accumulation_steps 8 \
+    --gradient_accumulation_steps $(expr 8 / $nproc_per_node) \
     --eval_steps 10 \
     --save_steps 10 \
     --save_total_limit 2 \
@@ -50,9 +58,10 @@ swift sft \
     --max_length 4096 \
     --output_dir output \
     --warmup_ratio 0.05 \
-    --use_liger_kernel true \
+    --label_names labels \
     --load_from_cache_file false \
     --loss_scale ignore_empty_think \
     --model_author laddermedia \
     --model_name SHARP-Qwen3-32B-Pluck \
-    --report_to wandb
+    --report_to wandb \
+    --deepspeed zero2
