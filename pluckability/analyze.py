@@ -89,66 +89,69 @@ def create_detailed_breakdown(data: Dict[str, pd.DataFrame], console: Console) -
     """Create Detailed Breakdown by Run and Split."""
     console.print("\n[bold blue]🔍 Detailed Breakdown (Run × Split)[/bold blue]")
 
-    table = Table(
-        title="Detailed Breakdown (Run × Split)",
-        show_header=True,
-        header_style="bold magenta",
-        box=None,
-        padding=(0, 1),
-        title_justify="left",
-    )
-
-    table.add_column("Run", style="cyan", no_wrap=True)
-    table.add_column("Split", style="orange3", no_wrap=True)
-    table.add_column("n", justify="right", style="green", no_wrap=True)
-    table.add_column("accuracy", justify="right", style="yellow", no_wrap=True)
-    table.add_column("precision", justify="right", style="yellow", no_wrap=True)
-    table.add_column("recall", justify="right", style="yellow", no_wrap=True)
-    table.add_column("f1", justify="right", style="yellow", no_wrap=True)
+    # Collect all splits and their data
+    splits_data = {}
 
     for run_name, df in data.items():
-        if "split" in df.columns:
-            splits = sorted(df["split"].unique())
+        assert "split" in df.columns, "Split column is not in the dataframe"
+        splits = df["split"].unique()
+        for split in splits:
+            if split not in splits_data:
+                splits_data[split] = []
 
-            for split in splits:
-                split_df = df[df["split"] == split].copy()
-                # Filter out None predictions
-                split_df_filtered = split_df[~pd.isna(split_df["judge_prediction"])]
-                assert isinstance(split_df_filtered, pd.DataFrame)
+            split_df = df[df["split"] == split].copy()
+            # Filter out None predictions
+            split_df_filtered = split_df[~pd.isna(split_df["judge_prediction"])]
+            assert isinstance(split_df_filtered, pd.DataFrame)
 
-                if len(split_df_filtered) > 0:
-                    total = len(split_df_filtered)
-                    accuracy, precision, recall, f1 = calculate_metrics(split_df_filtered)
-
-                    table.add_row(
-                        run_name,
-                        split,
-                        str(total),
-                        f"{accuracy:.3f}",
-                        f"{precision:.3f}",
-                        f"{recall:.3f}",
-                        f"{f1:.3f}",
-                    )
-        else:
-            # If no split column, show as single entry
-            df_filtered = df[~pd.isna(df["judge_prediction"])]
-            assert isinstance(df_filtered, pd.DataFrame)
-
-            if len(df_filtered) > 0:
-                total = len(df_filtered)
-                accuracy, precision, recall, f1 = calculate_metrics(df_filtered)
-
-                table.add_row(
-                    run_name,
-                    "all",
-                    str(total),
-                    f"{accuracy:.3f}",
-                    f"{precision:.3f}",
-                    f"{recall:.3f}",
-                    f"{f1:.3f}",
+            if len(split_df_filtered) > 0:
+                total = len(split_df_filtered)
+                accuracy, precision, recall, f1 = calculate_metrics(split_df_filtered)
+                splits_data[split].append(
+                    {
+                        "run": run_name,
+                        "n": total,
+                        "accuracy": accuracy,
+                        "precision": precision,
+                        "recall": recall,
+                        "f1": f1,
+                    }
                 )
 
-    console.print(table)
+    # Create a separate table for each split, sorted by accuracy
+    for split in sorted(splits_data.keys()):
+        runs_list = splits_data[split]
+        # Sort by accuracy (descending)
+        runs_list.sort(key=lambda x: x["accuracy"], reverse=True)
+
+        table = Table(
+            title=f"Split: {split}",
+            show_header=True,
+            header_style="bold magenta",
+            box=None,
+            padding=(0, 1),
+            title_justify="left",
+        )
+
+        table.add_column("Run", style="cyan", no_wrap=True)
+        table.add_column("n", justify="right", style="green", no_wrap=True)
+        table.add_column("accuracy", justify="right", style="yellow", no_wrap=True)
+        table.add_column("precision", justify="right", style="yellow", no_wrap=True)
+        table.add_column("recall", justify="right", style="yellow", no_wrap=True)
+        table.add_column("f1", justify="right", style="yellow", no_wrap=True)
+
+        for run_data in runs_list:
+            table.add_row(
+                run_data["run"],
+                str(run_data["n"]),
+                f"{run_data['accuracy']:.3f}",
+                f"{run_data['precision']:.3f}",
+                f"{run_data['recall']:.3f}",
+                f"{run_data['f1']:.3f}",
+            )
+
+        console.print(table)
+        console.print()  # Add spacing between tables
 
 
 def main():
