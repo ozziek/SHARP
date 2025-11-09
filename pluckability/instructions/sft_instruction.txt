@@ -29,7 +29,7 @@ Evaluate the provided `Memory Prompt` against the highlighted text and its inter
 
 ## Output Format
 
-Your response must be a single JSON object with two keys: `reason` and `pluckable`.
+Your response must be a JSON object with a single key: `pluckable` which describes whether the prompt is pluckable or not.
 
 ```json
 {"pluckable": true/false}

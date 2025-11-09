@@ -87,6 +87,8 @@ def _balance_dataset(dataset: Dataset, seed: int, max_rows: int | None = None):
     assert isinstance(flashcard_ids, list), "Flashcard IDs is not a list"
     assert len(flashcard_ids) == len(balanced_dataset), "There are duplicate rows in the dataset"
 
+    balanced_dataset = balanced_dataset.shuffle(seed=seed)
+
     return balanced_dataset
 
 
