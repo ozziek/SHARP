@@ -114,10 +114,11 @@ def create_detailed_breakdown(data: Dict[str, pd.DataFrame], console: Console) -
                 split_df = df[df["split"] == split].copy()
                 # Filter out None predictions
                 split_df_filtered = split_df[~pd.isna(split_df["judge_prediction"])]
+                assert isinstance(split_df_filtered, pd.DataFrame)
 
                 if len(split_df_filtered) > 0:
                     total = len(split_df_filtered)
-                    accuracy, precision, recall, f1 = calculate_metrics(pd.DataFrame(split_df))
+                    accuracy, precision, recall, f1 = calculate_metrics(split_df_filtered)
 
                     table.add_row(
                         run_name,
@@ -131,9 +132,11 @@ def create_detailed_breakdown(data: Dict[str, pd.DataFrame], console: Console) -
         else:
             # If no split column, show as single entry
             df_filtered = df[~pd.isna(df["judge_prediction"])]
+            assert isinstance(df_filtered, pd.DataFrame)
+
             if len(df_filtered) > 0:
                 total = len(df_filtered)
-                accuracy, precision, recall, f1 = calculate_metrics(df)
+                accuracy, precision, recall, f1 = calculate_metrics(df_filtered)
 
                 table.add_row(
                     run_name,
