@@ -54,7 +54,7 @@ def _balance_dataset(dataset: Dataset, seed: int, max_rows: int | None = None):
         # to prevent overfitting to a single source, select a random row from each unique URI
         selected_ids: set[int] = set()
 
-        def _select_random_row(subset: Dataset) -> dict:
+        def _select_random_row(subset: Dataset):
             # choose a random unique URI
             attempts = 0
             while attempts < 100:
@@ -69,14 +69,20 @@ def _balance_dataset(dataset: Dataset, seed: int, max_rows: int | None = None):
                     continue
                 selected_ids.add(row[0]["id"])
                 assert isinstance(row, Dataset), "Row is not a Dataset"
-                return row[0]
+                # drop the row from the subset
+                subset = subset.filter(lambda x: x["id"] != row[0]["id"])
+                assert isinstance(subset, Dataset), "Subset is not a Dataset"
+                return row[0], subset
             assert False, "Failed to select a random row; too many attempts"
 
         rows: list[dict] = []
         while len(rows) < max_length:
             # select one from each row
-            rows.append(_select_random_row(dataset_pluckable))
-            rows.append(_select_random_row(dataset_unpluckable))
+            pluckable_row, dataset_pluckable = _select_random_row(dataset_pluckable)
+            rows.append(pluckable_row)
+
+            unpluckable_row, dataset_unpluckable = _select_random_row(dataset_unpluckable)
+            rows.append(unpluckable_row)
 
         balanced_dataset = Dataset.from_list(rows)
 
@@ -115,38 +121,116 @@ def build_dataset(dataset: Dataset, base_instruction: str):
     return training_completions
 
 
-def build_training_dataset(dataset: DatasetDict, base_instruction: str, seed: int, max_rows: int | None = None):
+def build_training_dataset(
+    dataset: Dataset, base_instruction: str, challenge: bool, seed: int, max_rows: int | None = None
+):
     assert seed is not None and isinstance(seed, int), "Seed is not an integer"
     random.seed(seed)
 
     logging.info("Dataset: %s", dataset)
-    assert "train" in dataset, "Train dataset is not in the dataset"
-
-    train_dataset = dataset["train"]
-    assert isinstance(train_dataset, Dataset), "Train dataset is not a Dataset"
-
-    # filter the dataset for only challenging exampels (examples the model gets wrong consistently)
-    result_set = load_jsonl_data("./pluckability/results")
-
-    # filter for only the zero-shot and multi-shot results
-    result_set = {k: v for k, v in result_set.items() if "zero_shot" in k or "multi_shot" in k}
 
     # identifying challenging examples
-    logging.info("Identifying challenging examples from: %s", result_set.keys())
-    challenging_flashcard_ids = identify_challenging_flashcards(result_set)
+    if challenge:
+        # filter the dataset for only challenging exampels (examples the model gets wrong consistently)
+        result_set = load_jsonl_data("./pluckability/results")
 
-    challenging_examples = train_dataset.filter(lambda x: x["id"] in challenging_flashcard_ids)
-    challenging_examples = challenging_examples.shuffle(seed=seed)
+        # filter for only the zero-shot and multi-shot results
+        result_set = {k: v for k, v in result_set.items() if "zero_shot" in k or "multi_shot" in k}
 
-    challenging_examples = _balance_dataset(challenging_examples, max_rows=max_rows, seed=seed)
+        logging.info("Identifying challenging examples from: %s", result_set.keys())
+        challenging_flashcard_ids = identify_challenging_flashcards(result_set)
 
-    _analyze_dataset(challenging_examples)
+        challenging_examples = dataset.filter(lambda x: x["id"] in challenging_flashcard_ids)
+        challenging_examples = challenging_examples.shuffle(seed=seed)
+
+        examples = _balance_dataset(challenging_examples, max_rows=max_rows, seed=seed)
+        del challenging_examples
+    else:
+        examples = _balance_dataset(dataset.shuffle(seed=seed), max_rows=max_rows, seed=seed)
+
+    _analyze_dataset(examples)
 
     logging.info("Building training completions")
-    training_completions = build_dataset(challenging_examples, base_instruction)
+    training_completions = build_dataset(examples, base_instruction)
     assert isinstance(training_completions, list), "Training completions is not a list"
 
     return training_completions
+
+
+def _upload_openai_file(client: OpenAI, data: list[dict]):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl") as temp_file:
+        with open(temp_file.name, "w") as f:
+            for completion in data:
+                f.write(json.dumps(completion) + "\n")
+
+        logging.info(
+            "Uploading training data to OpenAI",
+        )
+        openai_file = client.files.create(
+            file=open(temp_file.name, "rb"),
+            purpose="fine-tune",
+            expires_after={"anchor": "created_at", "seconds": 2592000},  # 30 days
+        )
+        logging.info("Uploaded training data to OpenAI: %s", openai_file.id)
+
+    return openai_file
+
+
+def main(args):
+    with open(args.base_instruction_file, "r") as f:
+        base_instruction = f.read()
+
+    dataset = load_dataset(args.dataset)
+    assert isinstance(dataset, DatasetDict), "Dataset is not a DatasetDict"
+
+    train_completions = build_training_dataset(
+        dataset=dataset["train"],
+        base_instruction=base_instruction,
+        challenge=True,  # use the challenging examples for training
+        seed=args.seed,
+        max_rows=args.max_rows,
+    )
+    test_completions = build_training_dataset(
+        dataset=dataset["test"],
+        base_instruction=base_instruction,
+        challenge=False,
+        seed=args.seed,
+        max_rows=args.max_rows,
+    )
+    assert isinstance(test_completions, list), "Eval completions is not a list"
+
+    if args.dry_run:
+        logging.info("Dry run, skipping upload and fine-tuning job creation")
+        exit(0)
+
+    # save the file to a temporary file
+    train_file = _upload_openai_file(client, train_completions)
+    test_file = _upload_openai_file(client, test_completions)
+
+    # use a batch size of 1 for the online fine-tuning job (this is the default when you create a job, however I decreased the n_epochs to avoid overfitting)
+    online_fine_tuning_job = client.fine_tuning.jobs.create(
+        model=args.model,
+        hyperparameters={
+            "batch_size": 1,
+            "n_epochs": 1,
+        },
+        training_file=train_file.id,
+        validation_file=test_file.id,
+        suffix="sharp-pluckability-online",
+    )
+    logging.info("Created online fine-tuning job: %s", online_fine_tuning_job.model_dump_json())
+
+    # use a batch size of 4 for the offline fine-tuning job
+    fine_tuning_job = client.fine_tuning.jobs.create(
+        model=args.model,
+        hyperparameters={
+            "batch_size": 4,
+        },
+        training_file=train_file.id,
+        validation_file=test_file.id,
+        suffix="sharp-pluckability",
+    )
+    logging.info("Created online fine-tuning job: %s", fine_tuning_job.model_dump_json())
 
 
 if __name__ == "__main__":
@@ -167,41 +251,4 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="Do not upload the training data to OpenAI")
     args = parser.parse_args()
 
-    with open(args.base_instruction_file, "r") as f:
-        base_instruction = f.read()
-
-    dataset = load_dataset(args.dataset)
-    assert isinstance(dataset, DatasetDict), "Dataset is not a DatasetDict"
-
-    training_completions = build_training_dataset(
-        dataset=dataset, base_instruction=base_instruction, seed=args.seed, max_rows=args.max_rows
-    )
-
-    if args.dry_run:
-        logging.info("Dry run, skipping upload and fine-tuning job creation")
-        exit(0)
-
-    # save the file to a temporary file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".jsonl") as temp_file:
-        with open(temp_file.name, "w") as f:
-            for completion in training_completions:
-                f.write(json.dumps(completion) + "\n")
-
-        logging.info(
-            "Uploading training data to OpenAI",
-        )
-        openai_file = client.files.create(
-            file=open(temp_file.name, "rb"),
-            purpose="fine-tune",
-            expires_after={"anchor": "created_at", "seconds": 2592000},  # 30 days
-        )
-        logging.info("Uploaded training data to OpenAI: %s", openai_file.id)
-
-    logging.info("Creating fine-tuning job for model: %s", args.model)
-
-    fine_tuning_job = client.fine_tuning.jobs.create(
-        model=args.model,
-        training_file=openai_file.id,
-        suffix="sharp-pluckability",
-    )
-    logging.info("Created fine-tuning job: %s", fine_tuning_job.model_dump_json())
+    main(args)
