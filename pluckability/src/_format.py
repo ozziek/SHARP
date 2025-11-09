@@ -17,7 +17,8 @@ I highlighted the following text:
 ## Memory Prompt
 
 {content}
-"""
+
+/no_think"""
 
 
 def format_user_message(row: SHARPCard) -> str:
