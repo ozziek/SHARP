@@ -4,13 +4,20 @@ set -e  # Exit on any error
 
 echo "🚀 Starting HuggingFace SFT training..."
 
+# Get the script's directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Change to project root
+cd "$PROJECT_ROOT"
+
 # setup initial environment
 uv sync
 
-source .venv/bin/activate
+source "$PROJECT_ROOT/.venv/bin/activate"
 
 # Install training dependencies
-pip install transformers peft trl accelerate wandb
+uv pip install transformers peft trl accelerate wandb
 
 # Run training
 python pluckability/train_hf_sft.py \
