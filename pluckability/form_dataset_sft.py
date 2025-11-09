@@ -1,39 +1,62 @@
+from argparse import ArgumentParser
+from collections import defaultdict
 import json
 import random
-from datasets import Dataset
+from typing import cast
+from datasets import Dataset, DatasetDict, load_dataset
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
 
-from pluckability.src._types import SHARPCard
+from src._format import format_user_message
+from src._types import SHARPCard
 
 
 def _balance_dataset(dataset: Dataset, seed: int):
     """Balances the dataset by randomly selecting one row from each unique source URL, round robin."""
-    pluckable_dataset = dataset.filter(lambda x: x["pluckable"])
-    unpluckable_dataset = dataset.filter(lambda x: not x["pluckable"])
 
-    def _select_random_row(subset: Dataset):
+    pluckable = 0
+    pluckable_dataset_by_url: dict[str, list[dict]] = defaultdict(list)
+    for row in dataset.filter(lambda x: x["pluckable"]):
+        pluckable += 1
+        assert isinstance(row, dict), "Row is not a SHARPCard"
+        source_url = row["source_url"]
+        assert isinstance(source_url, str), "Source URL is not a string"
+        pluckable_dataset_by_url[source_url].append(row)
+
+    unpluckable = 0
+    unpluckable_dataset_by_url: dict[str, list[dict]] = defaultdict(list)
+    for row in dataset.filter(lambda x: not x["pluckable"]):
+        unpluckable += 1
+        assert isinstance(row, dict), "Row is not a SHARPCard"
+        source_url = row["source_url"]
+        assert isinstance(source_url, str), "Source URL is not a string"
+        unpluckable_dataset_by_url[source_url].append(row)
+
+    def _select_random_row_mutating(subset: dict[str, list[dict]]):
         # choose a random unique URL to avoid overfitting to a single source
-        unique_urls = subset.unique("source_url")
-        assert len(unique_urls) > 0, "No unique URLs found"
-        url = random.choice(unique_urls)
-        row = subset.filter(lambda x: x["source_url"] == url).shuffle(seed=seed).select(range(1))
-        assert len(row) > 0, "No row found"
+        key = random.choice(list(subset.keys()))
 
-        row = row[0]
+        rows = subset[key]
+        assert len(rows) > 0, "No rows found"
 
-        # drop the row by id from the subset
-        subset = subset.filter(lambda x: x["id"] != row["id"])
+        # choose a random index from the list
+        index = random.randint(0, len(rows) - 1)
+        row = rows[index]
+        # remove the index from the list
+        rows.pop(index)
 
-        return row, subset
+        if len(rows) == 0:
+            # remove the key from the dictionary
+            subset.pop(key)
+
+        return row
 
     rows: list[dict] = []
-    base_length = min(len(pluckable_dataset), len(unpluckable_dataset))
-    while len(rows) < base_length:
+    while len(rows) < min(pluckable, unpluckable):
         # choose one random row from each dataset, round robin
-        pluckable_row, pluckable_dataset = _select_random_row(pluckable_dataset)
+        pluckable_row = _select_random_row_mutating(pluckable_dataset_by_url)
         rows.append(pluckable_row)
 
-        unpluckable_row, unpluckable_dataset = _select_random_row(unpluckable_dataset)
+        unpluckable_row = _select_random_row_mutating(unpluckable_dataset_by_url)
         rows.append(unpluckable_row)
 
     dataset = Dataset.from_list(rows)
@@ -68,6 +91,41 @@ def _build_messages(row: SHARPCard, base_instruction: str) -> list[ChatCompletio
 
 
 def build_dataset(dataset: Dataset, base_instruction: str) -> list[dict[str, list[ChatCompletionMessageParam]]]:
-    sft_dataset = load_dataset(cli_args.dataset)
+    balanced = _balance_dataset(dataset, seed=42)
+    rows = []
+    for row in balanced:
+        row = cast(SHARPCard, row)
+        messages = _build_messages(row, base_instruction)
+        rows.append(
+            {
+                "messages": messages,
+            }
+        )
+    return rows
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--dataset", type=str, default="ozziek/SHARP-Card")
+    parser.add_argument("--base_instruction", type=str, required=True)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--split", type=str, default="train")
+    parser.add_argument("-o", type=str, required=True)
+    args = parser.parse_args()
+
+    random.seed(args.seed)
+
+    with open(args.base_instruction, "r") as f:
+        base_instruction = f.read()
+
+    sft_dataset = load_dataset(args.dataset)
     assert isinstance(sft_dataset, DatasetDict), "Dataset is not a DatasetDict"
-    assert "train" in sft_dataset, "Train dataset is not in the dataset"
+    assert args.split in sft_dataset, f"{args.split} dataset is not in the dataset"
+
+    assert args.o.endswith(".jsonl"), "Output file must end with .jsonl"
+
+    sft_dataset = build_dataset(sft_dataset[args.split], base_instruction)
+    assert isinstance(sft_dataset, list), "SFT dataset is not a list"
+    with open(args.o, "w") as f:
+        for completion in sft_dataset:
+            f.write(json.dumps(completion) + "\n")
